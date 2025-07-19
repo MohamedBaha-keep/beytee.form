@@ -3,230 +3,213 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>نشر سيارة</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: Arial;
+      background: #f1f5f9;
       margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      padding: 20px;
     }
 
     .form-container {
-      width: 100%;
       max-width: 400px;
+      margin: 0 auto;
       background: #fff;
       padding: 20px;
-      border-radius: 14px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
     }
 
-    h2 {
-      font-size: 22px;
-      color: #1f2937;
-      margin-bottom: 18px;
-    }
-
-    input, select {
+    input, select, button {
       width: 100%;
       padding: 12px;
-      font-size: 15px;
-      margin: 8px 0;
-      border-radius: 8px;
+      margin: 10px 0;
+      border-radius: 6px;
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
 
-    .upload-btn {
-      margin-top: 10px;
-      background-color: #2563eb;
-      color: #fff;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
+    button {
+      background: #2563eb;
+      color: white;
       font-size: 16px;
+      border: none;
       cursor: pointer;
-      width: 100%;
     }
 
-    .upload-btn:hover {
-      background-color: #1d4ed8;
+    button:hover {
+      background: #1e40af;
     }
 
-    #preview {
+    .image-preview {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 10px;
-      justify-content: center;
     }
 
     .preview-img {
-      width: 80px;
-      height: 80px;
+      position: relative;
+      width: 70px;
+      height: 70px;
+    }
+
+    .preview-img img {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
       object-fit: cover;
-      border-radius: 8px;
-      position: relative;
     }
 
-    .img-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    .remove-btn {
+    .preview-img span {
       position: absolute;
       top: -6px;
       right: -6px;
       background: red;
       color: white;
-      border: none;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 14px;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      font-size: 14px;
     }
 
-    button[type="submit"] {
-      margin-top: 16px;
+    #successModal {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+    }
+
+    #successModal button {
+      margin-top: 10px;
       background-color: #2563eb;
       color: white;
-      padding: 14px;
-      width: 100%;
+      padding: 10px;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
+      border-radius: 6px;
       cursor: pointer;
-    }
-
-    button[type="submit"]:hover {
-      background-color: #1d4ed8;
-    }
-
-    input[type="file"] {
-      display: none;
     }
   </style>
 </head>
 <body>
+  <div class="form-container">
+    <h2>نشر إعلان سيارة</h2>
+    <form id="carForm" onsubmit="submitCar(event)">
+      <input type="text" id="name" placeholder="الاسم الكامل" required />
+      <input type="text" id="phone" placeholder="رقم الهاتف" required />
+      <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
+      <input type="text" id="location" placeholder="الموقع" required />
+      <input type="text" id="make" placeholder="ماركة السيارة" required />
+      <input type="text" id="model" placeholder="موديل السيارة" required />
+      <input type="number" id="miles" placeholder="عدد الأميال" required />
+      <input type="file" id="images" accept="image/*" multiple style="display:none" onchange="handleImagePreview(event)" />
+      <button type="button" onclick="document.getElementById('images').click()">📷 تحميل الصور</button>
+      <div class="image-preview" id="preview"></div>
+      <button type="submit">📤 إرسال</button>
+    </form>
+  </div>
 
-<div class="form-container">
-  <h2>نشر إعلان سيارة</h2>
-  <input type="text" id="name" placeholder="الاسم الكامل" required />
-  <input type="text" id="phone" placeholder="رقم الهاتف" required />
-  <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
-  <input type="text" id="location" placeholder="الموقع" required />
-  <input type="text" id="make" placeholder="ماركة السيارة" required />
-  <input type="text" id="model" placeholder="موديل السيارة" required />
-  <input type="number" id="miles" placeholder="عدد الأميال" required />
+  <div id="successModal">
+    <p>✅ تم إرسال النموذج بنجاح. سيتصل بك أحد فريقنا قريبًا.</p>
+    <button onclick="closeModal()">إغلاق</button>
+  </div>
 
-  <label for="images" class="upload-btn">📷 تحميل الصور</label>
-  <input type="file" id="images" multiple accept="image/*" />
-  <div id="preview"></div>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoQa08An-qFnPSq9nYuG4yTf7G3m4xKAM",
+      authDomain: "beyteeapp-4c81b.firebaseapp.com",
+      projectId: "beyteeapp-4c81b",
+      storageBucket: "beyteeapp-4c81b.appspot.com",
+      messagingSenderId: "896634042113",
+      appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00"
+    };
 
-  <button type="submit" onclick="submitCar()">📤 إرسال</button>
-</div>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDoQa08An-qFnPSq9nYuG4yTf7G3m4xKAM",
-    authDomain: "beyteeapp-4c81b.firebaseapp.com",
-    projectId: "beyteeapp-4c81b",
-    storageBucket: "beyteeapp-4c81b.appspot.com",
-    messagingSenderId: "896634042113",
-    appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
-    measurementId: "G-TXS9845REB"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
+    let selectedFiles = [];
 
-<script>
-  let selectedFiles = [];
+    function handleImagePreview(event) {
+      selectedFiles = Array.from(event.target.files);
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '';
 
-  const fileInput = document.getElementById('images');
-  const previewContainer = document.getElementById('preview');
-
-  fileInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    selectedFiles.push(...files);
-
-    renderPreviews();
-  });
-
-  function renderPreviews() {
-    previewContainer.innerHTML = '';
-    selectedFiles.forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const imgContainer = document.createElement('div');
-        imgContainer.className = 'img-container';
-
-        const img = document.createElement('img');
-        img.src = reader.result;
-        img.className = 'preview-img';
-
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = '×';
-        removeBtn.className = 'remove-btn';
-        removeBtn.onclick = () => {
-          selectedFiles.splice(index, 1);
-          renderPreviews();
+      selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const container = document.createElement('div');
+          container.className = 'preview-img';
+          container.innerHTML = `
+            <img src="${e.target.result}" />
+            <span onclick="removeImage(${index})">×</span>
+          `;
+          preview.appendChild(container);
         };
-
-        imgContainer.appendChild(img);
-        imgContainer.appendChild(removeBtn);
-        previewContainer.appendChild(imgContainer);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function submitCar() {
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const location = document.getElementById('location').value.trim();
-    const make = document.getElementById('make').value.trim();
-    const model = document.getElementById('model').value.trim();
-    const miles = document.getElementById('miles').value.trim();
-
-    if (!name || !phone || !location || !make || !model || !miles) {
-      alert('❗ يرجى تعبئة جميع الحقول');
-      return;
+        reader.readAsDataURL(file);
+      });
     }
 
-    const urls = [];
-    for (const file of selectedFiles) {
-      const refPath = 'car-images/' + Date.now() + '-' + file.name;
-      const ref = storage.ref(refPath);
-      await ref.put(file);
-      const url = await ref.getDownloadURL();
-      urls.push(url);
+    function removeImage(index) {
+      selectedFiles.splice(index, 1);
+      handleImagePreview({ target: { files: selectedFiles } });
     }
 
-    await db.collection('carPosts').add({
-      name, phone, email, location, make, model, miles,
-      images: urls,
-      createdAt: new Date()
-    });
+    async function submitCar(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const location = document.getElementById('location').value;
+      const make = document.getElementById('make').value;
+      const model = document.getElementById('model').value;
+      const miles = document.getElementById('miles').value;
 
-    alert('✅ تم إرسال إعلان السيارة');
-    selectedFiles = [];
-    document.querySelector('form')?.reset();
-    renderPreviews();
-  }
-</script>
+      const urls = [];
+
+      for (const file of selectedFiles) {
+        const ref = storage.ref('car-images/' + Date.now() + '-' + file.name);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+        urls.push(url);
+      }
+
+      await db.collection('carPosts').add({
+        name,
+        phone,
+        email,
+        location,
+        make,
+        model,
+        miles,
+        images: urls,
+        createdAt: new Date()
+      });
+
+      document.getElementById('carForm').reset();
+      document.getElementById('preview').innerHTML = '';
+      document.getElementById('successModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('successModal').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
