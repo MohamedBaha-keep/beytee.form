@@ -2,155 +2,126 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>نشر منزل</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: Arial;
+      background: #f1f5f9;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
+      padding: 20px;
     }
 
     .form-container {
-      width: 90%;
-      max-width: 420px;
-      background: white;
-      padding: 24px;
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
     }
 
-    input, select {
+    input, select, button {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 16px;
+      box-sizing: border-box;
     }
 
     button {
       background: #2563eb;
       color: white;
-      padding: 14px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
       font-size: 16px;
+      border: none;
+      cursor: pointer;
     }
 
     button:hover {
-      background: #1d4ed8;
+      background: #1e40af;
     }
 
     .image-preview {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
       gap: 10px;
       margin-top: 10px;
     }
 
-    .image-preview div {
+    .preview-img {
       position: relative;
+      width: 70px;
+      height: 70px;
     }
 
-    .image-preview img {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
+    .preview-img img {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
       object-fit: cover;
     }
 
-    .image-preview span {
+    .preview-img span {
       position: absolute;
-      top: -5px;
-      left: -5px;
+      top: -6px;
+      right: -6px;
       background: red;
       color: white;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      font-size: 14px;
     }
 
     #successModal {
       position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.3);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #successModal .modal-content {
-      background: white;
-      padding: 20px 30px;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
       border-radius: 10px;
-      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
     }
 
     #successModal button {
-      margin-top: 20px;
+      margin-top: 10px;
+      background-color: #2563eb;
     }
-
-    .upload-btn {
-      background: #e2e8f0;
-      color: #2563eb;
-      border: 2px dashed #2563eb;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .upload-btn:hover {
-      background: #cbd5e1;
-    }
-
   </style>
 </head>
 <body>
-
   <div class="form-container">
     <h2>نشر إعلان منزل</h2>
-    <form id="houseForm">
+    <form id="houseForm" onsubmit="submitHouse(event)">
       <input type="text" id="name" placeholder="الاسم الكامل" required />
       <input type="text" id="phone" placeholder="رقم الهاتف" required />
       <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
       <input type="text" id="location" placeholder="الموقع" required />
-      <select id="type">
+      <select id="type" required>
         <option value="sell">للبيع</option>
         <option value="rent">للإيجار</option>
       </select>
-      <button type="button" class="upload-btn" onclick="document.getElementById('images').click()">📷 تحميل الصور</button>
-      <input type="file" id="images" multiple accept="image/*" style="display: none;" />
+      <input type="file" id="images" accept="image/*" multiple style="display:none" onchange="handleImagePreview(event)" />
+      <button type="button" onclick="document.getElementById('images').click()">📷 تحميل الصور</button>
       <div class="image-preview" id="preview"></div>
-      <button type="button" onclick="submitHouse()">📤 إرسال</button>
+      <button type="submit">📤 إرسال</button>
     </form>
   </div>
 
   <div id="successModal">
-    <div class="modal-content">
-      <h3>✅ تم إرسال النموذج بنجاح</h3>
-      <p>سيتصل بك المسؤول أو يرسل رسالة نصية قريباً.</p>
-      <button onclick="closeModal()">حسناً</button>
-    </div>
+    <p>✅ تم إرسال النموذج بنجاح. سيتصل بك أحد فريقنا قريبًا.</p>
+    <button onclick="closeModal()">إغلاق</button>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
@@ -161,45 +132,48 @@
       projectId: "beyteeapp-4c81b",
       storageBucket: "beyteeapp-4c81b.appspot.com",
       messagingSenderId: "896634042113",
-      appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
-      measurementId: "G-TXS9845REB"
+      appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const imagesInput = document.getElementById('images');
-    const preview = document.getElementById('preview');
     let selectedFiles = [];
 
-    imagesInput.addEventListener('change', (event) => {
-      const files = Array.from(event.target.files);
-      files.forEach(file => {
-        selectedFiles.push(file);
+    function handleImagePreview(event) {
+      selectedFiles = Array.from(event.target.files);
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '';
+
+      selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const div = document.createElement('div');
-          div.innerHTML = `<img src="${e.target.result}" /><span onclick="removeImage(this)">×</span>`;
-          preview.appendChild(div);
+        reader.onload = e => {
+          const container = document.createElement('div');
+          container.className = 'preview-img';
+          container.innerHTML = `
+            <img src="${e.target.result}" />
+            <span onclick="removeImage(${index})">×</span>
+          `;
+          preview.appendChild(container);
         };
         reader.readAsDataURL(file);
       });
-    });
-
-    function removeImage(btn) {
-      const div = btn.parentElement;
-      const index = Array.from(preview.children).indexOf(div);
-      selectedFiles.splice(index, 1);
-      div.remove();
     }
 
-    async function submitHouse() {
+    function removeImage(index) {
+      selectedFiles.splice(index, 1);
+      handleImagePreview({ target: { files: selectedFiles } });
+    }
+
+    async function submitHouse(e) {
+      e.preventDefault();
       const name = document.getElementById('name').value;
       const phone = document.getElementById('phone').value;
       const email = document.getElementById('email').value;
       const location = document.getElementById('location').value;
       const type = document.getElementById('type').value;
+
       const urls = [];
 
       for (const file of selectedFiles) {
@@ -210,19 +184,23 @@
       }
 
       await db.collection('pendingPosts').add({
-        name, phone, email, location, type, images: urls, createdAt: new Date()
+        name,
+        phone,
+        email,
+        location,
+        type,
+        images: urls,
+        createdAt: new Date()
       });
 
       document.getElementById('houseForm').reset();
-      preview.innerHTML = '';
-      selectedFiles = [];
-      document.getElementById('successModal').style.display = 'flex';
+      document.getElementById('preview').innerHTML = '';
+      document.getElementById('successModal').style.display = 'block';
     }
 
     function closeModal() {
       document.getElementById('successModal').style.display = 'none';
     }
   </script>
-
 </body>
 </html>
