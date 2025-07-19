@@ -1,112 +1,156 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>نشر سيارة</title>
+  <title>نشر منزل</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f0f4f8;
-      padding: 20px;
       margin: 0;
-      text-align: center;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
     }
+
     .form-container {
-      max-width: 500px;
-      margin: auto;
+      width: 90%;
+      max-width: 420px;
       background: white;
-      padding: 20px;
+      padding: 24px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transform: scale(1.08);
     }
+
     input, select {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 16px;
     }
-    .upload-btn {
+
+    button {
       background: #2563eb;
       color: white;
-      padding: 12px;
+      padding: 14px;
+      width: 100%;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-bottom: 10px;
-      width: 100%;
+      font-size: 16px;
     }
-    .upload-btn:hover {
+
+    button:hover {
       background: #1d4ed8;
     }
+
     .image-preview {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
       justify-content: center;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-top: 10px;
     }
-    .image-box {
+
+    .image-preview div {
       position: relative;
-      width: 100px;
-      height: 100px;
     }
-    .image-box img {
-      width: 100%;
-      height: 100%;
+
+    .image-preview img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
       object-fit: cover;
-      border-radius: 6px;
     }
-    .remove-btn {
+
+    .image-preview span {
       position: absolute;
-      top: -8px;
-      right: -8px;
+      top: -5px;
+      left: -5px;
       background: red;
       color: white;
       border-radius: 50%;
       width: 20px;
       height: 20px;
-      line-height: 20px;
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
-    button[type="submit"] {
-      background: #22c55e;
-      color: white;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button[type="submit"]:hover {
-      background: #16a34a;
-    }
-    input[type="file"] {
+
+    #successModal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
       display: none;
+      align-items: center;
+      justify-content: center;
     }
+
+    #successModal .modal-content {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #successModal button {
+      margin-top: 20px;
+    }
+
+    .upload-btn {
+      background: #e2e8f0;
+      color: #2563eb;
+      border: 2px dashed #2563eb;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .upload-btn:hover {
+      background: #cbd5e1;
+    }
+
   </style>
 </head>
 <body>
+
   <div class="form-container">
-    <h2>نشر إعلان سيارة</h2>
-    <input type="text" id="name" placeholder="الاسم الكامل" required />
-    <input type="text" id="phone" placeholder="رقم الهاتف" required />
-    <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
-    <input type="text" id="location" placeholder="الموقع" required />
-    <input type="text" id="make" placeholder="ماركة السيارة" required />
-    <input type="text" id="model" placeholder="موديل السيارة" required />
-    <input type="number" id="miles" placeholder="عدد الأميال" required />
-
-    <label for="images" class="upload-btn">📷 رفع الصور</label>
-    <input type="file" id="images" multiple accept="image/*" />
-    <div class="image-preview" id="previewContainer"></div>
-
-    <button type="submit" onclick="submitCar()">📤 إرسال</button>
+    <h2>نشر إعلان منزل</h2>
+    <form id="houseForm">
+      <input type="text" id="name" placeholder="الاسم الكامل" required />
+      <input type="text" id="phone" placeholder="رقم الهاتف" required />
+      <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
+      <input type="text" id="location" placeholder="الموقع" required />
+      <select id="type">
+        <option value="sell">للبيع</option>
+        <option value="rent">للإيجار</option>
+      </select>
+      <button type="button" class="upload-btn" onclick="document.getElementById('images').click()">📷 تحميل الصور</button>
+      <input type="file" id="images" multiple accept="image/*" style="display: none;" />
+      <div class="image-preview" id="preview"></div>
+      <button type="button" onclick="submitHouse()">📤 إرسال</button>
+    </form>
   </div>
 
-  <!-- Firebase SDKs -->
+  <div id="successModal">
+    <div class="modal-content">
+      <h3>✅ تم إرسال النموذج بنجاح</h3>
+      <p>سيتصل بك المسؤول أو يرسل رسالة نصية قريباً.</p>
+      <button onclick="closeModal()">حسناً</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
@@ -120,64 +164,65 @@
       appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
       measurementId: "G-TXS9845REB"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
+    const imagesInput = document.getElementById('images');
+    const preview = document.getElementById('preview');
     let selectedFiles = [];
 
-    const fileInput = document.getElementById('images');
-    const previewContainer = document.getElementById('previewContainer');
-
-    fileInput.addEventListener('change', (e) => {
-      const files = Array.from(e.target.files);
+    imagesInput.addEventListener('change', (event) => {
+      const files = Array.from(event.target.files);
       files.forEach(file => {
         selectedFiles.push(file);
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = (e) => {
           const div = document.createElement('div');
-          div.className = 'image-box';
-          div.innerHTML = `
-            <img src="${reader.result}" />
-            <span class="remove-btn" onclick="removeImage(this, '${file.name}')">×</span>
-          `;
-          previewContainer.appendChild(div);
+          div.innerHTML = `<img src="${e.target.result}" /><span onclick="removeImage(this)">×</span>`;
+          preview.appendChild(div);
         };
         reader.readAsDataURL(file);
       });
-      fileInput.value = ""; // Reset input
     });
 
-    function removeImage(element, filename) {
-      const box = element.parentElement;
-      previewContainer.removeChild(box);
-      selectedFiles = selectedFiles.filter(file => file.name !== filename);
+    function removeImage(btn) {
+      const div = btn.parentElement;
+      const index = Array.from(preview.children).indexOf(div);
+      selectedFiles.splice(index, 1);
+      div.remove();
     }
 
-    async function submitCar() {
+    async function submitHouse() {
       const name = document.getElementById('name').value;
       const phone = document.getElementById('phone').value;
       const email = document.getElementById('email').value;
       const location = document.getElementById('location').value;
-      const make = document.getElementById('make').value;
-      const model = document.getElementById('model').value;
-      const miles = document.getElementById('miles').value;
+      const type = document.getElementById('type').value;
       const urls = [];
 
       for (const file of selectedFiles) {
-        const storageRef = storage.ref('car-images/' + Date.now() + '-' + file.name);
-        await storageRef.put(file);
-        const url = await storageRef.getDownloadURL();
+        const ref = storage.ref('property-images/' + Date.now() + '-' + file.name);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
         urls.push(url);
       }
 
-      await db.collection('carPosts').add({
-        name, phone, email, location, make, model, miles, images: urls, createdAt: new Date()
+      await db.collection('pendingPosts').add({
+        name, phone, email, location, type, images: urls, createdAt: new Date()
       });
 
-      alert('✅ تم إرسال إعلان السيارة');
-      location.reload();
+      document.getElementById('houseForm').reset();
+      preview.innerHTML = '';
+      selectedFiles = [];
+      document.getElementById('successModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('successModal').style.display = 'none';
     }
   </script>
+
 </body>
 </html>
