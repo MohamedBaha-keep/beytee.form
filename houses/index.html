@@ -3,72 +3,180 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>نشر منزل</title>
-  
-<style>
-  body { font-family: Arial; background: #f0f4f8; padding: 20px; text-align: center; }
-  .form-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; }
-  button { background: #2563eb; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; }
-  button:hover { background: #1d4ed8; }
-</style>
-
+  <title>نشر سيارة</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      margin: 0;
+      text-align: center;
+    }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .upload-btn {
+      background: #2563eb;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .upload-btn:hover {
+      background: #1d4ed8;
+    }
+    .image-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .image-box {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+    .image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .remove-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[type="submit"] {
+      background: #22c55e;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button[type="submit"]:hover {
+      background: #16a34a;
+    }
+    input[type="file"] {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div class="form-container">
-    <h2>نشر إعلان منزل</h2>
+    <h2>نشر إعلان سيارة</h2>
     <input type="text" id="name" placeholder="الاسم الكامل" required />
     <input type="text" id="phone" placeholder="رقم الهاتف" required />
     <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
     <input type="text" id="location" placeholder="الموقع" required />
-    <select id="type">
-      <option value="sell">للبيع</option>
-      <option value="rent">للإيجار</option>
-    </select>
-    <input type="file" id="images" multiple accept="image/*" />
-    <button onclick="submitHouse()">📤 إرسال</button>
-  </div>
-  
-<!-- Add Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
-<script>
- const firebaseConfig = {
-  apiKey: "AIzaSyDoQa08An-qFnPSq9nYuG4yTf7G3m4xKAM",
-  authDomain: "beyteeapp-4c81b.firebaseapp.com",
-  projectId: "beyteeapp-4c81b",
-  storageBucket: "beyteeapp-4c81b.firebasestorage.app",
-  messagingSenderId: "896634042113",
-  appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
-  measurementId: "G-TXS9845REB"
-};
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
+    <input type="text" id="make" placeholder="ماركة السيارة" required />
+    <input type="text" id="model" placeholder="موديل السيارة" required />
+    <input type="number" id="miles" placeholder="عدد الأميال" required />
 
+    <label for="images" class="upload-btn">📷 رفع الصور</label>
+    <input type="file" id="images" multiple accept="image/*" />
+    <div class="image-preview" id="previewContainer"></div>
+
+    <button type="submit" onclick="submitCar()">📤 إرسال</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
   <script>
-    async function submitHouse() {
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoQa08An-qFnPSq9nYuG4yTf7G3m4xKAM",
+      authDomain: "beyteeapp-4c81b.firebaseapp.com",
+      projectId: "beyteeapp-4c81b",
+      storageBucket: "beyteeapp-4c81b.appspot.com",
+      messagingSenderId: "896634042113",
+      appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
+      measurementId: "G-TXS9845REB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    let selectedFiles = [];
+
+    const fileInput = document.getElementById('images');
+    const previewContainer = document.getElementById('previewContainer');
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        selectedFiles.push(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const div = document.createElement('div');
+          div.className = 'image-box';
+          div.innerHTML = `
+            <img src="${reader.result}" />
+            <span class="remove-btn" onclick="removeImage(this, '${file.name}')">×</span>
+          `;
+          previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+      fileInput.value = ""; // Reset input
+    });
+
+    function removeImage(element, filename) {
+      const box = element.parentElement;
+      previewContainer.removeChild(box);
+      selectedFiles = selectedFiles.filter(file => file.name !== filename);
+    }
+
+    async function submitCar() {
       const name = document.getElementById('name').value;
       const phone = document.getElementById('phone').value;
       const email = document.getElementById('email').value;
       const location = document.getElementById('location').value;
-      const type = document.getElementById('type').value;
-      const files = document.getElementById('images').files;
+      const make = document.getElementById('make').value;
+      const model = document.getElementById('model').value;
+      const miles = document.getElementById('miles').value;
       const urls = [];
 
-      for (const file of files) {
-        const storageRef = storage.ref('property-images/' + Date.now() + '-' + file.name);
+      for (const file of selectedFiles) {
+        const storageRef = storage.ref('car-images/' + Date.now() + '-' + file.name);
         await storageRef.put(file);
         const url = await storageRef.getDownloadURL();
         urls.push(url);
       }
 
-      await db.collection('pendingPosts').add({
-        name, phone, email, location, type, images: urls, createdAt: new Date()
+      await db.collection('carPosts').add({
+        name, phone, email, location, make, model, miles, images: urls, createdAt: new Date()
       });
-      alert('✅ تم إرسال الإعلان بنجاح');
+
+      alert('✅ تم إرسال إعلان السيارة');
+      location.reload();
     }
   </script>
 </body>
