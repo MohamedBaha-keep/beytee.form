@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>نشر سيارة</title>
+  
+<style>
+  body { font-family: Arial; background: #f0f4f8; padding: 20px; text-align: center; }
+  .form-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; }
+  button { background: #2563eb; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; }
+  button:hover { background: #1d4ed8; }
+</style>
+
+</head>
+<body>
+  <div class="form-container">
+    <h2>نشر إعلان سيارة</h2>
+    <input type="text" id="name" placeholder="الاسم الكامل" required />
+    <input type="text" id="phone" placeholder="رقم الهاتف" required />
+    <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
+    <input type="text" id="location" placeholder="الموقع" required />
+    <input type="text" id="make" placeholder="ماركة السيارة" required />
+    <input type="text" id="model" placeholder="موديل السيارة" required />
+    <input type="number" id="miles" placeholder="عدد الأميال" required />
+    <input type="file" id="images" multiple accept="image/*" />
+    <button onclick="submitCar()">📤 إرسال</button>
+  </div>
+  
+<!-- Add Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
+<script>
+ const firebaseConfig = {
+  apiKey: "AIzaSyDoQa08An-qFnPSq9nYuG4yTf7G3m4xKAM",
+  authDomain: "beyteeapp-4c81b.firebaseapp.com",
+  projectId: "beyteeapp-4c81b",
+  storageBucket: "beyteeapp-4c81b.firebasestorage.app",
+  messagingSenderId: "896634042113",
+  appId: "1:896634042113:web:6f8f76b990d7ff4ed34d00",
+  measurementId: "G-TXS9845REB"
+};
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+
+  <script>
+    async function submitCar() {
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const location = document.getElementById('location').value;
+      const make = document.getElementById('make').value;
+      const model = document.getElementById('model').value;
+      const miles = document.getElementById('miles').value;
+      const files = document.getElementById('images').files;
+      const urls = [];
+
+      for (const file of files) {
+        const storageRef = storage.ref('car-images/' + Date.now() + '-' + file.name);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        urls.push(url);
+      }
+
+      await db.collection('carPosts').add({
+        name, phone, email, location, make, model, miles, images: urls, createdAt: new Date()
+      });
+      alert('✅ تم إرسال إعلان السيارة');
+    }
+  </script>
+</body>
+</html>

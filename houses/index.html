@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>نشر منزل</title>
+  
+<style>
+  body { font-family: Arial; background: #f0f4f8; padding: 20px; text-align: center; }
+  .form-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; }
+  button { background: #2563eb; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; }
+  button:hover { background: #1d4ed8; }
+</style>
+
+</head>
+<body>
+  <div class="form-container">
+    <h2>نشر إعلان منزل</h2>
+    <input type="text" id="name" placeholder="الاسم الكامل" required />
+    <input type="text" id="phone" placeholder="رقم الهاتف" required />
+    <input type="email" id="email" placeholder="البريد الإلكتروني (اختياري)" />
+    <input type="text" id="location" placeholder="الموقع" required />
+    <select id="type">
+      <option value="sell">للبيع</option>
+      <option value="rent">للإيجار</option>
+    </select>
+    <input type="file" id="images" multiple accept="image/*" />
+    <button onclick="submitHouse()">📤 إرسال</button>
+  </div>
+  
+<!-- Add Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+
+  <script>
+    async function submitHouse() {
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const location = document.getElementById('location').value;
+      const type = document.getElementById('type').value;
+      const files = document.getElementById('images').files;
+      const urls = [];
+
+      for (const file of files) {
+        const storageRef = storage.ref('property-images/' + Date.now() + '-' + file.name);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        urls.push(url);
+      }
+
+      await db.collection('pendingPosts').add({
+        name, phone, email, location, type, images: urls, createdAt: new Date()
+      });
+      alert('✅ تم إرسال الإعلان بنجاح');
+    }
+  </script>
+</body>
+</html>
